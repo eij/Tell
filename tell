@@ -1,0 +1,150 @@
+#!/bin/bash
+
+VERSION="1.1"
+
+# List of distro release version locations.
+
+DISTROS=(
+	'debian_version,Debian'		# Debian
+	'debian_release,Debian'
+	'lsb-release,Ubuntu'			# Ubuntu
+)
+
+# Array to search the process name, its packages and its display name.
+
+APPS=(
+
+	# PROCESS | PACKAGE,[n] | DISPLAY NAME
+
+									# Environments
+
+	'nautilus|gnome-core,gnome-desktop-environment|Gnome'
+	'dolphin|kde-core,kde-desktop|KDE'
+
+									# Browsers
+
+	'chrome|google-chrome-stable,google-chrome-unstable,google-chrome-beta|Chrome'
+	'chromium|chromium-browser|Chromium'
+	'firefox|firefox,iceweasel|Firefox'
+
+									# Docks
+
+	'docky|docky|Docky'
+	'avant-window-navigator|avant-window-navigator|AWN'
+	'cairo|cairo-dock,cairo-dock-core,cairo-dock-dev|Cairo-Dock'
+	'kibadock|kiba-dock|Kiba-Dock'
+
+)
+
+
+function show_help {
+	echo "Usage: tell <option>"
+	echo
+	echo "   all		- show all the tasks"
+	echo "   apps		- show only known applications in use"
+}
+
+function process_search {
+	P=`ps aux | grep -v 'grep' | grep -m1 $1`
+
+	if [ -z "$P" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+function process_name {
+	echo $1 | cut -d '|' -f3
+}
+
+function process_version {
+	L=`echo $1 | cut -d '|' -f2`
+	S=`echo $L | awk -F ',' '{print NF}'`
+
+	for (( K=0; K < $S; K++ ))
+	do
+
+		PACKAGE=`echo $L | cut -d ',' -f$((K + 1))`
+		PACKAGE_VERSION=`dpkg -l | grep -m1 $PACKAGE | awk '{print $3}' | sed 's/[0-9]://'`
+
+		if [ -n "$PACKAGE_VERSION" ]; then
+			echo $PACKAGE_VERSION
+			K=$S
+		fi
+
+	done
+}
+
+function show_distro {
+	unset V
+
+	for each in ${DISTROS[*]}; do
+		D=`echo $each | cut -d ',' -f1`
+
+		[ "$V" ] && break || [ -r /etc/$D ] && V=$(awk '{print $1}' /etc/$D)
+	done
+
+	O=`echo $each | cut -d ',' -f2`
+
+	echo "  $O $V"
+	echo "  `uname -n` @ `uname -r`"
+}
+
+function show_apps {
+	eval SIZE=\${#APPS[*]}
+
+	echo "	Apps"
+	echo
+
+	for (( C=0; C < $SIZE; C++ ))
+	do
+
+		PROCESS=`echo ${APPS[$C]} | cut -d '|' -f1`
+
+		process_search $PROCESS
+		S=$?
+
+		if [ "$S" == 1 ]; then
+			echo "   `process_name ${APPS[$C]}`		`process_version ${APPS[$C]}`"
+		fi
+
+	done
+}
+
+
+case "$1" in
+	all)
+		echo
+		show_distro
+		echo
+		show_apps
+		echo
+
+		exit 0
+		;;
+	apps)
+		echo
+		show_apps
+		echo
+
+		exit 0
+		;;
+	--help)
+		echo
+		show_help
+		echo
+
+		exit 0
+		;;
+	*)
+		echo
+		show_distro
+		echo
+		show_apps
+		echo
+
+		exit 1
+		;;
+esac
+
