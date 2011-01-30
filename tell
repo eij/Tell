@@ -1,34 +1,57 @@
 #!/bin/bash
 
-VERSION="1.3"
+VERSION="1.4"
 
 # Settings
 
-	USE_HEAD=y
-	USE_PLURAL=n
+USE_HEAD=y
+USE_PLURAL=n
 
-	STRIP_PRETAGS=y
-	STRIP_SUBVERSIONS=y
+SHOW_KERNEL=n
+SHOW_VERSION=y
+
+STRIP_PRETAGS=y
+STRIP_SUBVERSIONS=y
 
 # List of distro release version locations.
 
 DISTROS=(
-	'debian_version,Debian'		# Debian
+	# Debian
+
+	'debian_version,Debian'
 	'debian_release,Debian'
-	'lsb-release,Ubuntu'			# Ubuntu
+
+	# Ubuntu
+
+	'lsb-release,Ubuntu'
 )
 
 # Array PROCESS | PACKAGE,[n] | DISPLAY
 
 ENVIRONMENTS=(
-	'nautilus|gnome-core,gnome-desktop-environment|Gnome'
-	'dolphin|kde-core,kde-desktop|KDE'
+	'gnome-*|gnome-core,gnome-desktop-environment|Gnome'
+	'plasma-*|kde-core,kde-desktop|KDE'
+	'xfce4|xfce4|Xfce'
+	'lxde-*|lxde,lxde-core|LXDE'
+	'openbox|openbox|OpenBox'
+	'fluxbox|fluxbox|FluxBox'
+	'enlightenment|e17|Enlightenment'
+	'icewm|icewm,icewm-lite,icewm-experimental|IceWM'
+
+	'metacity|metacity|Metacity'
+	'kwin|kwin,kde-window-manager|KWin'
+	'compiz|compiz,compiz-gnome,compiz-kde|Compiz'
+	'emerald|emerald|Emerald'
+	'mutter|mutter|Mutter'
 )
 
 BROWSERS=(
 	'chrome|google-chrome-stable,google-chrome-unstable,google-chrome-beta|Google Chrome'
 	'chromium|chromium-browser|Chromium'
-	'firefox|firefox,iceweasel|Firefox'
+	'firefox|firefox,iceweasel,firefox-3.6,firefox-3.5|Firefox'
+	'epiphany-browser|epiphany-browser|Epiphany'
+	'opera|opera|Opera'
+	'midori|midori|Midori'
 )
 
 DOCKS=(
@@ -36,6 +59,24 @@ DOCKS=(
 	'avant-window-navigator|avant-window-navigator|AWN'
 	'cairo|cairo-dock,cairo-dock-core,cairo-dock-dev|Cairo-Dock'
 	'kibadock|kiba-dock|Kiba-Dock'
+)
+
+MESSENGERS=(
+	'pidgin|pidgin|Pidgin'
+	'empathy|empathy|Empathy'
+	'emesene|emesene|Emesene'
+	'amsn|amsn|AMSN'
+	'kopete|kopete|Kopete'
+
+	'xchat|xchat|XChat'
+	'irssi|irssi|Irssi'
+	'kvirc|kvirc|Kvirc'
+	'quassel|quassel,quassel-client|Quassel'
+)
+
+SOCIALSHIT=(
+	'pino|pino|Pino'
+	'gwibber|gwibber|Gwibber'
 )
 
 function process_search {
@@ -60,7 +101,7 @@ function process_version {
 	do
 
 		PACKAGE=`echo $L | cut -d ',' -f$((K + 1))`
-		PACKAGE_VERSION=`dpkg -l | grep -m1 $PACKAGE | awk '{print $3}'`
+		PACKAGE_VERSION=`dpkg -l | grep -m1 "^ii  $PACKAGE" | awk '{print $3}'`
 
 		if [ -n "$PACKAGE_VERSION" ]; then
 
@@ -84,10 +125,13 @@ function process_version {
 function show_help {
 	echo "Usage: tell [OPTIONS]"
 	echo
-	echo "  -a			show (known) applications in use"
+	echo "  -a			show (known) apps in use"
 	echo
+	echo "  -a			show environment specs"
 	echo "  -b			show open browser(s)"
 	echo "  -d			show open dock(s)"
+	echo "  -m			show open messenger(s)"
+	echo "  -s			show open social apps"
 	echo
 	echo "  -h			display this help"
 }
@@ -104,7 +148,12 @@ function show_distro {
 	O=`echo $each | cut -d ',' -f2`
 
 	echo "  $O $V"
-	echo "  `uname -n` @ `uname -r`"
+
+	if [ "$SHOW_KERNEL" == "y" ]; then
+		echo "  `uname -n` @ `uname -r`"
+	else
+		echo "  `whoami` @ `uname -n`"
+	fi
 }
 
 function show_task {
@@ -122,7 +171,13 @@ function show_task {
 		S=$?
 
 		if [ "$S" == 1 ]; then
-			OUT="${OUT}   `process_name "$CURRENT"`|        `process_version "$CURRENT"`\n"
+
+			if [ "$SHOW_VERSION" == "y" ]; then
+				OUT="${OUT}   `process_name "$CURRENT"`|   `process_version "$CURRENT"`\n"
+			else
+				OUT="${OUT}   `process_name "$CURRENT"`\n"
+			fi
+
 		fi
 
 	done
@@ -135,17 +190,15 @@ function show_task {
 }
 
 function show_all {
-	Y="${Y}   `show_task ENVIRONMENTS R`|   `show_task BROWSERS R`|   `show_task DOCKS R`"
+	Y="${Y}`show_task ENVIRONMENTS R`|\n|`show_task BROWSERS R`|`show_task DOCKS R`|`show_task MESSENGERS R`|`show_task SOCIALSHIT R`"
 
 	show_distro
-
 	echo
-
 	echo -e "$Y" | column -s '|' -t
 }
 
 
-while getopts  "habde" OPT
+while getopts  "habdems" OPT
 do
 
 	case $OPT in
@@ -162,7 +215,7 @@ do
 				echo
 			fi
 
-			APPS="${APPS}   `show_task BROWSERS R`|   `show_task DOCKS R`"
+			APPS="${APPS}   `show_task BROWSERS R`|   `show_task DOCKS R`|   `show_task MESSENGERS R`|   `show_task SOCIALSHIT R`"
 			echo -e "$APPS" | column -s '|' -t
 
 			echo
@@ -212,6 +265,35 @@ do
 			fi
 
 			show_task ENVIRONMENTS
+			echo
+			;;
+		m)
+			echo
+
+			if [ "$USE_HEAD" == "y" ]; then
+
+				if [ "$USE_PLURAL" == "y" ]; then
+					echo "	Messenger(s)"
+				else
+					echo "	Messenger"
+				fi
+
+				echo
+
+			fi
+
+			show_task MESSENGERS
+			echo
+			;;
+		s)
+			echo
+
+			if [ "$USE_HEAD" == "y" ]; then
+				echo "	Social"
+				echo
+			fi
+
+			show_task SOCIALSHIT
 			echo
 			;;
 	esac
