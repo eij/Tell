@@ -1,4 +1,14 @@
 Usage
 -----
 
-eij@box ~$ tell -h
+Basic sh usage:
+
+  you@box ~$ ./tell
+
+To install it:
+
+  you@box ~$ dpkg -i debs/*
+
+To use it:
+
+  you@box ~$ tell -h
