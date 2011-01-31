@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.5"
+VERSION="1.5.2"
 
 # Settings
 
@@ -72,6 +72,7 @@ PLAYERS=(
 	'mplayer|mplayer,mplayer-gui,mplayer-gnome|MPlayer'
 	'totem|totem|Totem'
 	'kaffeine|kaffeine|Kaffeine'
+	'vlc|vlc|VLC'
 
 	'rhythmbox|rhythmbox|Rhythmbox'
 	'amarok|amarok|Amarok'
@@ -87,14 +88,15 @@ MESSENGERS=(
 	'kopete|kopete|Kopete'
 
 	'xchat|xchat|XChat'
+	'quassel|quassel,quassel-client|Quassel'
 	'irssi|irssi|Irssi'
 	'kvirc|kvirc|Kvirc'
-	'quassel|quassel,quassel-client|Quassel'
 )
 
 SOCIALSHIT=(
 	'pino|pino|Pino'
 	'gwibber|gwibber|Gwibber'
+	'twitux|twitux|Twitux'
 )
 
 function process_search {
@@ -171,7 +173,7 @@ function show_distro {
 	if [ "$SHOW_KERNEL" == "y" ]; then
 		echo "  `uname -n` @ `uname -r`"
 	else
-		echo "  `whoami` @ `uname -n`"
+		echo "  $USER @ $HOSTNAME"
 	fi
 }
 
@@ -181,7 +183,6 @@ function show_task {
 
 	for (( C=0; C < $SIZE; C++ ))
 	do
-
 		eval CURRENT=\${${1}[$C]}
 
 		PROCESS=`echo $CURRENT | cut -d '|' -f1`
@@ -198,7 +199,6 @@ function show_task {
 			fi
 
 		fi
-
 	done
 
 	if [ "$2" == "R" ]; then
