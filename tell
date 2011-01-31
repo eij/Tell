@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.5.2"
+VERSION="1.6"
 
 # Settings
 
@@ -12,6 +12,13 @@ SHOW_VERSION=y
 
 STRIP_PRETAGS=y
 STRIP_SUBVERSIONS=y
+
+USE_COLORS=y
+
+COLOR_D="\e[1m"		# Distribution
+COLOR_H="\e[0m"		# Headers
+COLOR_A="\e[31;1m"		# Application
+COLOR_V="\e[0m"		# Version
 
 # Storing our package list.
 
@@ -168,10 +175,14 @@ function show_distro {
 
 	O=`echo $each | cut -d ',' -f2`
 
-	echo "  $O $V"
+	if [ "$USE_COLORS" == "y" ]; then
+		echo -e "  $COLOR_D$O $V\e[0m"
+	else
+		echo "  $O $V"
+	fi
 
 	if [ "$SHOW_KERNEL" == "y" ]; then
-		echo "  `uname -n` @ `uname -r`"
+		echo "  `$HOSTNAME` @ `uname -r`"
 	else
 		echo "  $USER @ $HOSTNAME"
 	fi
@@ -193,7 +204,11 @@ function show_task {
 		if [ "$S" == 1 ]; then
 
 			if [ "$SHOW_VERSION" == "y" ]; then
-				OUT="${OUT}   `process_name "$CURRENT"`|     `process_version "$CURRENT"`\n"
+				if [ "$USE_COLORS" == "y" ]; then
+					OUT="${OUT}   $COLOR_A`process_name "$CURRENT"`\e[0m|     $COLOR_V`process_version "$CURRENT"`\e[0m\n"
+				else
+					OUT="${OUT}   `process_name "$CURRENT"`|     `process_version "$CURRENT"`\n"
+				fi
 			else
 				OUT="${OUT}   `process_name "$CURRENT"`\n"
 			fi
@@ -230,7 +245,12 @@ do
 			echo
 
 			if [ "$USE_HEAD" == "y" ]; then
-				echo "	Apps"
+				if [ "$USE_COLORS" == "y" ]; then
+					echo -e "	$COLOR_H Apps\e[0m"
+				else
+					echo "	Apps"
+				fi
+
 				echo
 			fi
 
@@ -243,11 +263,18 @@ do
 			echo
 
 			if [ "$USE_HEAD" == "y" ]; then
-
 				if [ "$USE_PLURAL" == "y" ]; then
-					echo "	Browser(s)"
+					if [ "$USE_COLORS" == "y" ]; then
+						echo -e "	$COLOR_H Browser(s)\e[0m"
+					else
+						echo "	Browser(s)"
+					fi
 				else
-					echo "	Browser"
+					if [ "$USE_COLORS" == "y" ]; then
+						echo -e "	$COLOR_H Browser\e[0m"
+					else
+						echo "	Browser"
+					fi
 				fi
 
 				echo
@@ -261,11 +288,18 @@ do
 			echo
 
 			if [ "$USE_HEAD" == "y" ]; then
-
 				if [ "$USE_PLURAL" == "y" ]; then
-					echo "	Dock(s)"
+					if [ "$USE_COLORS" == "y" ]; then
+						echo -e "	$COLOR_H Dock(s)\e[0m"
+					else
+						echo "	Dock(s)"
+					fi
 				else
-					echo "	Dock"
+					if [ "$USE_COLORS" == "y" ]; then
+						echo -e "	$COLOR_H Dock\e[0m"
+					else
+						echo "	Dock"
+					fi
 				fi
 
 				echo
@@ -279,7 +313,12 @@ do
 			echo
 
 			if [ "$USE_HEAD" == "y" ]; then
-				echo "	Environment"
+				if [ "$USE_COLORS" == "y" ]; then
+					echo -e "	$COLOR_H Environment\e[0m"
+				else
+					echo "	Environment"
+				fi
+
 				echo
 			fi
 
@@ -290,11 +329,18 @@ do
 			echo
 
 			if [ "$USE_HEAD" == "y" ]; then
-
 				if [ "$USE_PLURAL" == "y" ]; then
-					echo "	Messenger(s)"
+					if [ "$USE_COLORS" == "y" ]; then
+						echo -e "	$COLOR_H Messenger(s)\e[0m"
+					else
+						echo "	Messenger(s)"
+					fi
 				else
-					echo "	Messenger"
+					if [ "$USE_COLORS" == "y" ]; then
+						echo -e "	$COLOR_H Messenger\e[0m"
+					else
+						echo "	Messenger"
+					fi
 				fi
 
 				echo
@@ -308,11 +354,18 @@ do
 			echo
 
 			if [ "$USE_HEAD" == "y" ]; then
-
 				if [ "$USE_PLURAL" == "y" ]; then
-					echo "	Player(s)"
+					if [ "$USE_COLORS" == "y" ]; then
+						echo -e "	$COLOR_H Player(s)\e[0m"
+					else
+						echo "	Player(s)"
+					fi
 				else
-					echo "	Player"
+					if [ "$USE_COLORS" == "y" ]; then
+						echo -e "	$COLOR_H Player\e[0m"
+					else
+						echo "	Player"
+					fi
 				fi
 
 				echo
@@ -326,7 +379,12 @@ do
 			echo
 
 			if [ "$USE_HEAD" == "y" ]; then
-				echo "	Social"
+				if [ "$USE_COLORS" == "y" ]; then
+					echo -e "	$COLOR_H Social\e[0m"
+				else
+					echo "	Social"
+				fi
+
 				echo
 			fi
 
