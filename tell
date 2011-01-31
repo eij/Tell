@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.4"
+VERSION="1.5"
 
 # Settings
 
@@ -12,6 +12,10 @@ SHOW_VERSION=y
 
 STRIP_PRETAGS=y
 STRIP_SUBVERSIONS=y
+
+# Storing our package list.
+
+dpkg -l >> /tmp/__dpkgl_tmp
 
 # List of distro release version locations.
 
@@ -31,7 +35,7 @@ DISTROS=(
 ENVIRONMENTS=(
 	'gnome-*|gnome-core,gnome-desktop-environment|Gnome'
 	'plasma-*|kde-core,kde-desktop|KDE'
-	'xfce4|xfce4|Xfce'
+	'xfce4|xfce4|XFCE'
 	'lxde-*|lxde,lxde-core|LXDE'
 	'openbox|openbox|OpenBox'
 	'fluxbox|fluxbox|FluxBox'
@@ -43,14 +47,17 @@ ENVIRONMENTS=(
 	'compiz|compiz,compiz-gnome,compiz-kde|Compiz'
 	'emerald|emerald|Emerald'
 	'mutter|mutter|Mutter'
+	'xfwm|xfwm4|XFWM'
+	'awesome|awesome|Awesome'
 )
 
 BROWSERS=(
 	'chrome|google-chrome-stable,google-chrome-unstable,google-chrome-beta|Google Chrome'
 	'chromium|chromium-browser|Chromium'
 	'firefox|firefox,iceweasel,firefox-3.6,firefox-3.5|Firefox'
-	'epiphany-browser|epiphany-browser|Epiphany'
 	'opera|opera|Opera'
+	'konqueror|konqueror|Konqueror'
+	'epiphany-browser|epiphany-browser|Epiphany'
 	'midori|midori|Midori'
 )
 
@@ -59,6 +66,17 @@ DOCKS=(
 	'avant-window-navigator|avant-window-navigator|AWN'
 	'cairo|cairo-dock,cairo-dock-core,cairo-dock-dev|Cairo-Dock'
 	'kibadock|kiba-dock|Kiba-Dock'
+)
+
+PLAYERS=(
+	'mplayer|mplayer,mplayer-gui,mplayer-gnome|MPlayer'
+	'totem|totem|Totem'
+	'kaffeine|kaffeine|Kaffeine'
+
+	'rhythmbox|rhythmbox|Rhythmbox'
+	'amarok|amarok|Amarok'
+	'banshee|banshee|Banshee'
+	'exaile|exaile|Exaile'
 )
 
 MESSENGERS=(
@@ -101,7 +119,7 @@ function process_version {
 	do
 
 		PACKAGE=`echo $L | cut -d ',' -f$((K + 1))`
-		PACKAGE_VERSION=`dpkg -l | grep -m1 "^ii  $PACKAGE" | awk '{print $3}'`
+		PACKAGE_VERSION=`cat /tmp/__dpkgl_tmp | grep -m1 "^ii  $PACKAGE" | awk '{print $3}'`
 
 		if [ -n "$PACKAGE_VERSION" ]; then
 
@@ -132,6 +150,7 @@ function show_help {
 	echo "  -d			show open dock(s)"
 	echo "  -m			show open messenger(s)"
 	echo "  -s			show open social apps"
+	echo "  -p			show open audio\video player(s)"
 	echo
 	echo "  -h			display this help"
 }
@@ -173,7 +192,7 @@ function show_task {
 		if [ "$S" == 1 ]; then
 
 			if [ "$SHOW_VERSION" == "y" ]; then
-				OUT="${OUT}   `process_name "$CURRENT"`|   `process_version "$CURRENT"`\n"
+				OUT="${OUT}   `process_name "$CURRENT"`|     `process_version "$CURRENT"`\n"
 			else
 				OUT="${OUT}   `process_name "$CURRENT"`\n"
 			fi
@@ -190,7 +209,7 @@ function show_task {
 }
 
 function show_all {
-	Y="${Y}`show_task ENVIRONMENTS R`|\n|`show_task BROWSERS R`|`show_task DOCKS R`|`show_task MESSENGERS R`|`show_task SOCIALSHIT R`"
+	Y="${Y}`show_task ENVIRONMENTS R`|\n|`show_task BROWSERS R`|`show_task DOCKS R`|`show_task MESSENGERS R`|`show_task SOCIALSHIT R`|`show_task PLAYERS R`"
 
 	show_distro
 	echo
@@ -198,7 +217,7 @@ function show_all {
 }
 
 
-while getopts  "habdems" OPT
+while getopts  "habdemps" OPT
 do
 
 	case $OPT in
@@ -215,7 +234,7 @@ do
 				echo
 			fi
 
-			APPS="${APPS}   `show_task BROWSERS R`|   `show_task DOCKS R`|   `show_task MESSENGERS R`|   `show_task SOCIALSHIT R`"
+			APPS="${APPS}   `show_task BROWSERS R`|   `show_task DOCKS R`|   `show_task MESSENGERS R`|   `show_task SOCIALSHIT R`|   `show_task PLAYERS R`"
 			echo -e "$APPS" | column -s '|' -t
 
 			echo
@@ -285,6 +304,24 @@ do
 			show_task MESSENGERS
 			echo
 			;;
+		p)
+			echo
+
+			if [ "$USE_HEAD" == "y" ]; then
+
+				if [ "$USE_PLURAL" == "y" ]; then
+					echo "	Player(s)"
+				else
+					echo "	Player"
+				fi
+
+				echo
+
+			fi
+
+			show_task PLAYERS
+			echo
+			;;
 		s)
 			echo
 
@@ -305,5 +342,7 @@ if [ "$OPTIND" -eq "1" ]; then
 	show_all
 	echo
 fi
+
+rm /tmp/__dpkgl_tmp
 
 exit 0
