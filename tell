@@ -225,6 +225,7 @@ function show_task {
 }
 
 function show_all {
+	unset Y
 	Y="${Y}`show_task ENVIRONMENTS R`|\n|`show_task BROWSERS R`|`show_task DOCKS R`|`show_task MESSENGERS R`|`show_task SOCIALSHIT R`|`show_task PLAYERS R`"
 
 	show_distro
@@ -255,7 +256,7 @@ do
 				echo
 			fi
 
-			APPS="${APPS}   `show_task BROWSERS R`|   `show_task DOCKS R`|   `show_task MESSENGERS R`|   `show_task SOCIALSHIT R`|   `show_task PLAYERS R`"
+			APPS="${APPS}`show_task BROWSERS R`|`show_task DOCKS R`|`show_task MESSENGERS R`|`show_task SOCIALSHIT R`|`show_task PLAYERS R`"
 			echo -e "$APPS" | column -s '|' -t
 
 			echo
