@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.6"
+VERSION="1.6.2"
 
 # Settings
 
@@ -23,6 +23,7 @@ COLOR_V="\e[0m"		# Version
 # Storing our package list.
 
 dpkg -l >> /tmp/__dpkgl_tmp
+ps aux >> /tmp/__psaux_tmp
 
 # List of distro release version locations.
 
@@ -107,7 +108,7 @@ SOCIALSHIT=(
 )
 
 function process_search {
-	P=`ps aux | grep -v 'grep' | grep -m1 $1`
+	P=`cat /tmp/__psaux_tmp | grep -v 'grep' | grep -m1 $1`
 
 	if [ -z "$P" ]; then
 		return 0
@@ -402,5 +403,6 @@ if [ "$OPTIND" -eq "1" ]; then
 fi
 
 rm /tmp/__dpkgl_tmp
+rm /tmp/__psaux_tmp
 
 exit 0
